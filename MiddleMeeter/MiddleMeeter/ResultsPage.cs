@@ -13,26 +13,18 @@ namespace MiddleMeeter {
     public ResultsPage(Result[] results) {
       Title = "Results";
 
-      //var section = new TableSection();
-      //foreach (var result in results) {
-      //  section.Add(new TextCell { Text = result.Name, Detail = result.Description });
-      //}
+      var section = new TableSection();
+      foreach (var result in results) {
+        section.Add(new TextCell { Text = result.Name, Detail = result.Description });
+      }
 
-      //Content = new TableView {
-      //  Intent = TableIntent.Menu,
-      //  Root = new TableRoot {
-      //    section
-      //  }
-      //};
-
-      var template = new DataTemplate(typeof(TextCell));
-      template.SetBinding(TextCell.TextProperty, new Binding("Name"));
-      template.SetBinding(TextCell.DetailProperty, new Binding("Description"));
-
-      Content = new ListView {
-        ItemsSource = results,
-        ItemTemplate = template,
+      Content = new TableView {
+        Intent = TableIntent.Menu,
+        Root = new TableRoot {
+          section
+        }
       };
+
     }
   }
 }
