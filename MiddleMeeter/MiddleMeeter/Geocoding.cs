@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Xamarin.Forms;
+using Xamarin.Forms.Labs.Services.Geolocation;
 
 namespace MiddleMeeter {
   public class Geocode {
@@ -18,6 +20,12 @@ namespace MiddleMeeter {
   }
 
   class Geocoding {
+    public async Task<Geocode> GetCurrentLocationAsync() {
+      var geolocator = DependencyService.Get<IGeolocator>();
+      var loc = await geolocator.GetPositionAsync(10000);
+      return new Geocode { Latitude = loc.Latitude, Longitude = loc.Longitude };
+    }
+
     public async Task<Geocode> GetGeocodeForLocationAsync(string addr) {
       string url = string.Format("http://maps.googleapis.com/maps/api/geocode/xml?address={0}", Uri.EscapeUriString(addr));
       var xml = await (new HttpClient()).GetStringAsync(url);
@@ -51,7 +59,7 @@ namespace MiddleMeeter {
       };
     }
 
-    public async Task<Place[]> GetNearbyPlaces(Geocode g, string keyword) {
+    public async Task<Place[]> GetNearbyPlacesAsync(Geocode g, string keyword) {
       string request = string.Format("https://maps.googleapis.com/maps/api/place/nearbysearch/xml?location={0},{1}&rankby=distance&keyword={2}&key={3}", g.Latitude, g.Longitude, keyword, GetGoogleApiKey());
       var xml = await (new HttpClient()).GetStringAsync(request);
       var results = XDocument.Parse(xml).Element("PlaceSearchResponse").Elements("result");

@@ -123,7 +123,7 @@ namespace MiddleMeeter {
         var yourGeocode = await gc.GetGeocodeForLocationAsync(model.YourLocation);
         var theirGeocode = await gc.GetGeocodeForLocationAsync(model.TheirLocation);
         var middleGeocode = gc.GetGreatCircleMidpoint(yourGeocode, theirGeocode);
-        var places = await gc.GetNearbyPlaces(middleGeocode, model.Mode.ToString());
+        var places = await gc.GetNearbyPlacesAsync(middleGeocode, model.Mode.ToString());
 
         await Navigation.PushAsync(new ResultsPage(places));
       }
