@@ -67,6 +67,8 @@ namespace MiddleMeeter {
 
   class SearchPage : ContentPage {
     SearchModel model = new SearchModel();
+    ActivityIndicator activity = new ActivityIndicator();
+    Label error = new Label();
 
     public SearchPage() {
       Title = "Search";
@@ -105,22 +107,32 @@ namespace MiddleMeeter {
           new Label { Text = "Mode:" },
           picker,
           button1,
+          activity,
+          error,
         }
       };
     }
 
-    void button1_Clicked(object sender, EventArgs e) {
-      Debug.WriteLine("Search parameters:");
-      Debug.WriteLine("\tYourLocation= " + model.YourLocation);
-      Debug.WriteLine("\tTheirLocation= " + model.TheirLocation);
-      Debug.WriteLine("\tMode= " + model.Mode);
+    async void button1_Clicked(object sender, EventArgs e) {
+      try {
+        activity.IsRunning = true;
+        error.Text = "";
 
-      var results = new Result[] {
-        new Result { Name = "Starbucks", Description = "some coffee" },
-        new Result { Name = "Seattle's Best Coffee", Description = "some more coffee" },
-        new Result { Name = "Dutch Bros.", Description = "still more coffee" },
-      };
-      Navigation.PushAsync(new ResultsPage(results));
+        var gc = new Geocoding();
+
+        var yourGeocode = await gc.GetGeocodeForLocationAsync(model.YourLocation);
+        var theirGeocode = await gc.GetGeocodeForLocationAsync(model.TheirLocation);
+        var middleGeocode = gc.GetGreatCircleMidpoint(yourGeocode, theirGeocode);
+        var places = await gc.GetNearbyPlaces(middleGeocode, model.Mode.ToString());
+
+        await Navigation.PushAsync(new ResultsPage(places));
+      }
+      catch (Exception ex) {
+        error.Text = "Check your network connection: " + ex.Message;
+      }
+      finally {
+        activity.IsRunning = false;
+      }
     }
 
   }

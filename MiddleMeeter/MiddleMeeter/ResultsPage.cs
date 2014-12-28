@@ -1,18 +1,13 @@
 ﻿using Xamarin.Forms;
 
 namespace MiddleMeeter {
-  class Result {
-    public string Name { get; set; }
-    public string Description { get; set; }
-  }
-
   class ResultsPage : ContentPage {
-    public ResultsPage(Result[] results) {
+    public ResultsPage(Place[] results) {
       Title = "Places";
 
       var section = new TableSection();
       foreach (var result in results) {
-        section.Add(new TextCell { Text = result.Name, Detail = result.Description });
+        section.Add(new ImageCell { Text = result.Name, Detail = result.Vicinity, ImageSource = result.Icon });
       }
 
       Content = new TableView {
