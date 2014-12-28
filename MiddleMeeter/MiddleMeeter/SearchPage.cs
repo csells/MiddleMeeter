@@ -90,6 +90,14 @@ namespace MiddleMeeter {
       var theirLocation = new Entry { Placeholder = "their location" };
       theirLocation.SetBinding(Entry.TextProperty, new Binding("TheirLocation"));
 
+      // disable Search button if no locations entered
+      Action checkLocations = () => {
+        button1.IsEnabled = !string.IsNullOrEmpty(yourLocation.Text) && !string.IsNullOrEmpty(theirLocation.Text);
+      };
+      yourLocation.TextChanged += (sender, e) => checkLocations();
+      theirLocation.TextChanged += (sender, e) => checkLocations();
+      checkLocations();
+
       Content = new StackLayout {
         Children = {
           new Label { Text = "Your Location:" },

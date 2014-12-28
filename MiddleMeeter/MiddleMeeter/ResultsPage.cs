@@ -11,7 +11,7 @@ namespace MiddleMeeter {
 
   class ResultsPage : ContentPage {
     public ResultsPage(Result[] results) {
-      Title = "Results";
+      Title = "Places";
 
       var section = new TableSection();
       foreach (var result in results) {
@@ -20,7 +20,7 @@ namespace MiddleMeeter {
 
       Content = new TableView {
         Intent = TableIntent.Menu,
-        Root = new TableRoot {
+        Root = new TableRoot("Places") {
           section
         }
       };
