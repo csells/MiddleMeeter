@@ -53,13 +53,8 @@ namespace MiddleMeeter.WinPhone {
         PhoneApplicationService.Current.UserIdleDetectionMode = IdleDetectionMode.Disabled;
       }
 
-      // DONE: set up services
-      new Xamarin.Forms.Labs.Services.Geolocation.Geolocator(); // force dependency injection
-      var resolverContainer = new SimpleContainer();
-      resolverContainer.Register<IDevice>(t => WindowsPhoneDevice.CurrentDevice)
-        .Register<IDisplay>(t => t.Resolve<IDevice>().Display)
-        .Register<IDependencyContainer>(resolverContainer);
-      Resolver.SetResolver(resolverContainer.GetResolver());
+      // DONE: force dependency injection
+      new Xamarin.Forms.Labs.Services.Geolocation.Geolocator();
     }
 
     // Code to execute when the application is launching (eg, from Start)

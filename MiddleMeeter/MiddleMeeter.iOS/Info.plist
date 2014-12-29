@@ -28,5 +28,7 @@
     <string>com.yourcompany.MiddleMeeter</string>
     <key>CFBundleVersion</key>
     <string>1.0</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Lookup your location</string>
   </dict>
 </plist>

@@ -113,6 +113,25 @@ namespace MiddleMeeter {
       };
     }
 
+    async protected override void OnAppearing() {
+      base.OnAppearing();
+
+      try {
+        activity.IsRunning = true;
+
+        var gc = new Geocoding();
+        var loc = await gc.GetCurrentLocationAsync();
+        var addr = await gc.GetAddressForLocationAsync(loc);
+        model.YourLocation = addr;
+      }
+      catch (Exception ex) {
+        error.Text = "Can't get your location: " + ex.Message;
+      }
+      finally {
+        activity.IsRunning = false;
+      }
+    }
+
     async void button1_Clicked(object sender, EventArgs e) {
       try {
         activity.IsRunning = true;
