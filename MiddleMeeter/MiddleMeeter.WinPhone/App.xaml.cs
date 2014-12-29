@@ -54,6 +54,7 @@ namespace MiddleMeeter.WinPhone {
       }
 
       // DONE: set up services
+      new Xamarin.Forms.Labs.Services.Geolocation.Geolocator(); // force dependency injection
       var resolverContainer = new SimpleContainer();
       resolverContainer.Register<IDevice>(t => WindowsPhoneDevice.CurrentDevice)
         .Register<IDisplay>(t => t.Resolve<IDevice>().Display)

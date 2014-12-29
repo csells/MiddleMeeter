@@ -26,6 +26,12 @@ namespace MiddleMeeter {
       return new Geocode { Latitude = loc.Latitude, Longitude = loc.Longitude };
     }
 
+    public async Task<string> GetAddressForLocationAsync(Geocode loc) {
+      string request = string.Format("https://maps.googleapis.com/maps/api/geocode/xml?latlng={0},{1}", loc.Latitude, loc.Longitude);
+      var xml = await (new HttpClient()).GetStringAsync(request);
+      return XDocument.Parse(xml).Element("GeocodeResponse").Element("result").Element("formatted_address").Value;
+    }
+
     public async Task<Geocode> GetGeocodeForLocationAsync(string addr) {
       string url = string.Format("http://maps.googleapis.com/maps/api/geocode/xml?address={0}", Uri.EscapeUriString(addr));
       var xml = await (new HttpClient()).GetStringAsync(url);
