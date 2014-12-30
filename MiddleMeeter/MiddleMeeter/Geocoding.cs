@@ -20,6 +20,20 @@ namespace MiddleMeeter {
   }
 
   class Geocoding {
+    public async Task<string[]> GetLocationSuggestionsAsync(string search) {
+      string request = string.Format("https://maps.googleapis.com/maps/api/place/autocomplete/xml?input={0}&key={1}", search, GetGoogleApiKey());
+      var xml = await (new HttpClient()).GetStringAsync(request);
+      var results = XDocument.Parse(xml).Element("AutocompletionResponse").Elements("prediction");
+
+      var suggestions = new List<string>();
+      foreach (var result in results) {
+        var suggestion = result.Element("description").Value;
+        suggestions.Add(suggestion);
+      }
+
+      return suggestions.ToArray();
+    }
+
     public async Task<Geocode> GetCurrentLocationAsync() {
       var geolocator = DependencyService.Get<IGeolocator>();
       var loc = await geolocator.GetPositionAsync(10000);

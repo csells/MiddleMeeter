@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Xamarin.Forms;
+using Xamarin.Forms.Labs.Controls;
 
 namespace MiddleMeeter {
   enum SearchMode {
@@ -87,15 +87,25 @@ namespace MiddleMeeter {
       var yourLocation = new Entry { Placeholder = "your location" };
       yourLocation.SetBinding(Entry.TextProperty, new Binding("YourLocation"));
 
-      var theirLocation = new Entry { Placeholder = "their location" };
-      theirLocation.SetBinding(Entry.TextProperty, new Binding("TheirLocation"));
+      var theirLocation = new AutoCompleteView {
+        Placeholder = "their location",
+        ShowSearchButton = false,
+        SelectedCommand = new Command(() => { }),
+      };
+      theirLocation.SetBinding(AutoCompleteView.TextProperty, new Binding("TheirLocation"));
 
       // disable Search button if no locations entered
       Action checkLocations = () => {
         button1.IsEnabled = !string.IsNullOrEmpty(yourLocation.Text) && !string.IsNullOrEmpty(theirLocation.Text);
       };
       yourLocation.TextChanged += (sender, e) => checkLocations();
-      theirLocation.TextChanged += (sender, e) => checkLocations();
+      theirLocation.PropertyChanged += (sender, e) => {
+        if (e.PropertyName == "Text" &&
+          !object.ReferenceEquals(theirLocation.ListViewSugestions.SelectedItem, theirLocation.Text)) {
+          checkLocations();
+          PopulateLocationSuggestions(theirLocation);
+        }
+      };
       checkLocations();
 
       Content = new StackLayout {
@@ -111,6 +121,20 @@ namespace MiddleMeeter {
           error,
         }
       };
+    }
+
+    async void PopulateLocationSuggestions(AutoCompleteView theirLocation) {
+      // avoid Sugestions, which filters, and set AvailableSugestions directly.
+      theirLocation.AvailableSugestions.Clear();
+
+      var addr = theirLocation.Text;
+      if (addr != null && addr.Length > 2) {
+        var gc = new Geocoding();
+        var suggestions = await gc.GetLocationSuggestionsAsync(addr);
+        foreach (var s in suggestions) { theirLocation.AvailableSugestions.Add(s); }
+      }
+
+      theirLocation.ListViewSugestions.IsVisible = theirLocation.AvailableSugestions.Count > 0;
     }
 
     async protected override void OnAppearing() {
