@@ -139,6 +139,7 @@ namespace MiddleMeeter {
 
     async protected override void OnAppearing() {
       base.OnAppearing();
+      if (!string.IsNullOrWhiteSpace(model.YourLocation)) { return; }
 
       try {
         activity.IsRunning = true;

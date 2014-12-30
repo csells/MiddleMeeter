@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MiddleMeeter", "MiddleMeeter\MiddleMeeter\MiddleMeeter.shproj", "{DA072B86-3DC2-415D-87A3-2D1CCE66EA62}"
 EndProject
@@ -80,6 +80,8 @@ Global
 		{1E086206-83AD-4D74-B872-0A7277BEB2AA}.Debug|ARM.Build.0 = Debug|ARM
 		{1E086206-83AD-4D74-B872-0A7277BEB2AA}.Debug|ARM.Deploy.0 = Debug|ARM
 		{1E086206-83AD-4D74-B872-0A7277BEB2AA}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{1E086206-83AD-4D74-B872-0A7277BEB2AA}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{1E086206-83AD-4D74-B872-0A7277BEB2AA}.Debug|iPhone.Deploy.0 = Debug|Any CPU
 		{1E086206-83AD-4D74-B872-0A7277BEB2AA}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
 		{1E086206-83AD-4D74-B872-0A7277BEB2AA}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{1E086206-83AD-4D74-B872-0A7277BEB2AA}.Debug|Mixed Platforms.Build.0 = Debug|x86
