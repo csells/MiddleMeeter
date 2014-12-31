@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -103,9 +104,19 @@ namespace MiddleMeeter {
     }
 
     string GetGoogleApiKey() {
-      #region HIDDEN
-      return "AIzaSyAKyMHMp3scZ4kEcdRu0Kc2F3p5Xv86HfE";
-      #endregion
+      // from http://developer.xamarin.com/guides/cross-platform/xamarin-forms/working-with/files/
+      // NOTE: expects Embedded Resource named config.xml of the following format:
+      // <?xml version="1.0" encoding="utf-8" ?>
+      // <config>
+      //   <google-api-key>YourGoogleApiKeyHere</google-api-key>
+      // </config>
+      var type = this.GetType();
+      var resource = type.Namespace + "." + Device.OnPlatform("iOS", "Droid", "WinPhone") + ".config.xml";
+      using (var stream = type.Assembly.GetManifestResourceStream(resource))
+      using (var reader = new StreamReader(stream)) {
+        var doc = XDocument.Parse(reader.ReadToEnd());
+        return doc.Element("config").Element("google-api-key").Value;
+      }
     }
 
   }

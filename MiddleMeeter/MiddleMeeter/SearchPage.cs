@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Refractored.Xam.Settings;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Xamarin.Forms;
@@ -23,8 +24,9 @@ namespace MiddleMeeter {
 
   class SearchModel : INotifyPropertyChanged {
     string yourLocation;
-    string theirLocation;
-    SearchMode mode = SearchMode.food;
+    // reading values saved during the last session (or setting defaults)
+    string theirLocation = CrossSettings.Current.GetValueOrDefault("theirLocation", "");
+    SearchMode mode = CrossSettings.Current.GetValueOrDefault("mode", SearchMode.food);
 
     public string YourLocation {
       get { return this.yourLocation; }
@@ -93,6 +95,7 @@ namespace MiddleMeeter {
         SelectedCommand = new Command(() => { }),
       };
       theirLocation.SetBinding(AutoCompleteView.TextProperty, new Binding("TheirLocation"));
+      theirLocation.TextEntry.Text = model.TheirLocation;
 
       // disable Search button if no locations entered
       Action checkLocations = () => {
@@ -168,6 +171,10 @@ namespace MiddleMeeter {
         var theirGeocode = await gc.GetGeocodeForLocationAsync(model.TheirLocation);
         var middleGeocode = gc.GetGreatCircleMidpoint(yourGeocode, theirGeocode);
         var places = await gc.GetNearbyPlacesAsync(middleGeocode, model.Mode.ToString());
+
+        // writing settings values at an appropriate time
+        CrossSettings.Current.AddOrUpdateValue("theirLocation", model.TheirLocation);
+        CrossSettings.Current.AddOrUpdateValue("mode", model.Mode);
 
         await Navigation.PushAsync(new ResultsPage(places));
       }

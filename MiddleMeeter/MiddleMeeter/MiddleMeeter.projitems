@@ -14,4 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ResultsPage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SearchPage.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)config.xml" />
+  </ItemGroup>
 </Project>
