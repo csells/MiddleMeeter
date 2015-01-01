@@ -9,6 +9,7 @@
     <Import_RootNamespace>MiddleMeeter</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Orientation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Geocoding.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ResultsPage.cs" />

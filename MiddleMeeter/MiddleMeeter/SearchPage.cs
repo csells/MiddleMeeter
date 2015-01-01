@@ -101,7 +101,7 @@ namespace MiddleMeeter {
       Action checkLocations = () => {
         button1.IsEnabled = !string.IsNullOrEmpty(yourLocation.Text) && !string.IsNullOrEmpty(theirLocation.Text);
       };
-      yourLocation.TextChanged += (sender, e) => checkLocations();
+      yourLocation.PropertyChanged += (sender, e) => { if (e.PropertyName == "Text") { checkLocations(); } };
       theirLocation.PropertyChanged += (sender, e) => {
         if (e.PropertyName == "Text" &&
           !object.ReferenceEquals(theirLocation.ListViewSugestions.SelectedItem, theirLocation.Text)) {
@@ -111,7 +111,7 @@ namespace MiddleMeeter {
       };
       checkLocations();
 
-      Content = new StackLayout {
+      Func<View> portraitView = () => new StackLayout {
         Children = {
           new Label { Text = "Your Location:" },
           yourLocation,
@@ -124,6 +124,50 @@ namespace MiddleMeeter {
           error,
         }
       };
+
+      Func<View> landscapeView = () => {
+        var grid = new Grid {
+          Children = {
+            GridChild(0, 0, new Label { Text = "Your Location:", VerticalOptions = LayoutOptions.Center }),
+            GridChild(0, 1, yourLocation),
+            GridChild(1, 0, new Label { Text = "Their Location:", VerticalOptions = LayoutOptions.Center }),
+            GridChild(1, 1, theirLocation),
+            GridChild(2, 0, new Label { Text = "Mode:", VerticalOptions = LayoutOptions.Center }),
+            GridChild(2, 1, picker),
+            GridChild(3, 0, button1),
+            GridChild(4, 0, activity),
+            GridChild(5, 0, error),
+          },
+          ColumnDefinitions = {
+            new ColumnDefinition { Width = GridLength.Auto },
+            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+          },
+          RowDefinitions = {
+            new RowDefinition { Height = GridLength.Auto },
+            new RowDefinition { Height = GridLength.Auto },
+            new RowDefinition { Height = GridLength.Auto },
+            new RowDefinition { Height = GridLength.Auto },
+            new RowDefinition { Height = GridLength.Auto },
+            new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+          },
+        };
+
+        Grid.SetColumnSpan(grid.Children[6], grid.ColumnDefinitions.Count);
+        Grid.SetColumnSpan(grid.Children[7], grid.ColumnDefinitions.Count);
+        Grid.SetColumnSpan(grid.Children[8], grid.ColumnDefinitions.Count);
+
+        return grid;
+      };
+
+      SizeChanged += (sender, e) => Content = IsPortrait(this) ? portraitView() : landscapeView();
+    }
+
+    static bool IsPortrait(Page p) { return p.Width < p.Height; }
+
+    View GridChild(int row, int col, View child) {
+      Grid.SetRow(child, row);
+      Grid.SetColumn(child, col);
+      return child;
     }
 
     async void PopulateLocationSuggestions(AutoCompleteView theirLocation) {
@@ -142,6 +186,7 @@ namespace MiddleMeeter {
 
     async protected override void OnAppearing() {
       base.OnAppearing();
+
       if (!string.IsNullOrWhiteSpace(model.YourLocation)) { return; }
 
       try {
@@ -185,6 +230,5 @@ namespace MiddleMeeter {
         activity.IsRunning = false;
       }
     }
-
   }
 }
