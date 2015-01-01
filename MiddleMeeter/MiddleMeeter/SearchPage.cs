@@ -101,7 +101,7 @@ namespace MiddleMeeter {
       Action checkLocations = () => {
         button1.IsEnabled = !string.IsNullOrEmpty(yourLocation.Text) && !string.IsNullOrEmpty(theirLocation.Text);
       };
-      yourLocation.PropertyChanged += (sender, e) => { if (e.PropertyName == "Text") { checkLocations(); } };
+      yourLocation.TextChanged += (sender, e) => { checkLocations(); };
       theirLocation.PropertyChanged += (sender, e) => {
         if (e.PropertyName == "Text" &&
           !object.ReferenceEquals(theirLocation.ListViewSugestions.SelectedItem, theirLocation.Text)) {
