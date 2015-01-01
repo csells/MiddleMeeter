@@ -27,6 +27,7 @@ namespace MiddleMeeter {
     // reading values saved during the last session (or setting defaults)
     string theirLocation = CrossSettings.Current.GetValueOrDefault("theirLocation", "");
     SearchMode mode = CrossSettings.Current.GetValueOrDefault("mode", SearchMode.food);
+    Place[] results = null;
 
     public string YourLocation {
       get { return this.yourLocation; }
@@ -58,6 +59,16 @@ namespace MiddleMeeter {
       }
     }
 
+    public Place[] Results {
+      get { return this.results; }
+      set {
+        if (this.results != value) {
+          this.results = value;
+          NotifyPropertyChanged();
+        }
+      }
+    }
+
     void NotifyPropertyChanged([CallerMemberName]string propertyName = "") {
       if (PropertyChanged != null) {
         PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
@@ -71,6 +82,7 @@ namespace MiddleMeeter {
     SearchModel model = new SearchModel();
     ActivityIndicator activity = new ActivityIndicator();
     Label error = new Label();
+    ResultsView resultsView = new ResultsView();
 
     public SearchPage() {
       Title = "Search";
@@ -111,6 +123,9 @@ namespace MiddleMeeter {
       };
       checkLocations();
 
+      resultsView.SetBinding(ResultsView.ResultsProperty, "Results");
+      var deviceResultsView = Device.Idiom == TargetIdiom.Tablet ? resultsView : new ContentView();
+
       Func<View> portraitView = () => new StackLayout {
         Children = {
           new Label { Text = "Your Location:" },
@@ -122,6 +137,7 @@ namespace MiddleMeeter {
           button1,
           activity,
           error,
+          deviceResultsView,
         }
       };
 
@@ -137,12 +153,14 @@ namespace MiddleMeeter {
             GridChild(3, 0, button1),
             GridChild(4, 0, activity),
             GridChild(5, 0, error),
+            GridChild(6, 0, deviceResultsView),
           },
           ColumnDefinitions = {
             new ColumnDefinition { Width = GridLength.Auto },
             new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
           },
           RowDefinitions = {
+            new RowDefinition { Height = GridLength.Auto },
             new RowDefinition { Height = GridLength.Auto },
             new RowDefinition { Height = GridLength.Auto },
             new RowDefinition { Height = GridLength.Auto },
@@ -155,6 +173,7 @@ namespace MiddleMeeter {
         Grid.SetColumnSpan(grid.Children[6], grid.ColumnDefinitions.Count);
         Grid.SetColumnSpan(grid.Children[7], grid.ColumnDefinitions.Count);
         Grid.SetColumnSpan(grid.Children[8], grid.ColumnDefinitions.Count);
+        Grid.SetColumnSpan(grid.Children[9], grid.ColumnDefinitions.Count);
 
         return grid;
       };
@@ -221,7 +240,10 @@ namespace MiddleMeeter {
         CrossSettings.Current.AddOrUpdateValue("theirLocation", model.TheirLocation);
         CrossSettings.Current.AddOrUpdateValue("mode", model.Mode);
 
-        await Navigation.PushAsync(new ResultsPage(places));
+        resultsView.Results = places;
+        if (Device.Idiom != TargetIdiom.Tablet) {
+          await Navigation.PushAsync(new ResultsPage(resultsView));
+        }
       }
       catch (Exception ex) {
         error.Text = "Check your network connection: " + ex.Message;

@@ -1,26 +1,39 @@
 ﻿using System;
-using System.Diagnostics;
 using Xamarin.Forms;
 
 namespace MiddleMeeter {
-  class ResultsPage : ContentPage {
-    public ResultsPage(Place[] results) {
-      Title = "Places";
+  class ResultsView : ContentView {
+    public static readonly BindableProperty ResultsProperty =
+      BindableProperty.Create<ResultsView, Place[]>(view => view.Results, null);
 
-      var section = new TableSection("Search Results");
-      foreach (var result in results) {
-        var cell = new ImageCell { Text = result.Name, Detail = result.Vicinity, ImageSource = result.Icon };
-        cell.Tapped += (sender, e) => LaunchMapApp(result);
-        section.Add(cell);
-      }
+    public ResultsView() {
+      PropertyChanged += (sender, e) => {
+        if (e.PropertyName != "Results") { return; }
 
-      Content = new TableView {
-        Intent = TableIntent.Menu,
-        Root = new TableRoot("Places") {
-          section
+        if( Results == null || Results.Length == 0 ) {
+          Content = null;
+          return;
         }
-      };
 
+        var section = new TableSection("Search Results");
+        foreach (var result in Results) {
+          var cell = new ImageCell { Text = result.Name, Detail = result.Vicinity, ImageSource = result.Icon };
+          cell.Tapped += (sender2, e2) => LaunchMapApp(result);
+          section.Add(cell);
+        }
+
+        Content = new TableView {
+          Intent = TableIntent.Menu,
+          Root = new TableRoot("Places") {
+              section
+            }
+        };
+      };
+    }
+
+    public Place[] Results {
+      get { return (Place[])GetValue(ResultsProperty); }
+      set { SetValue(ResultsProperty, value); }
     }
 
     public void LaunchMapApp(Place place) {
@@ -41,6 +54,14 @@ namespace MiddleMeeter {
       );
 
       Device.OpenUri(new Uri(request));
+    }
+
+  }
+
+  class ResultsPage : ContentPage {
+    public ResultsPage(ResultsView content) {
+      Title = "Places";
+      Content = content;
     }
 
   }
