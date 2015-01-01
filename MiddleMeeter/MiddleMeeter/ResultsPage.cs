@@ -7,7 +7,7 @@ namespace MiddleMeeter {
     public ResultsPage(Place[] results) {
       Title = "Places";
 
-      var section = new TableSection();
+      var section = new TableSection("Search Results");
       foreach (var result in results) {
         var cell = new ImageCell { Text = result.Name, Detail = result.Vicinity, ImageSource = result.Icon };
         cell.Tapped += (sender, e) => LaunchMapApp(result);
