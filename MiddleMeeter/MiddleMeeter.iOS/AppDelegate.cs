@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using MonoTouch.Foundation;
+﻿using MonoTouch.Foundation;
 using MonoTouch.UIKit;
-
 using Xamarin.Forms;
-using Xamarin.Forms.Labs.Services;
-using Xamarin.Forms.Labs;
 
 namespace MiddleMeeter.iOS {
   // The UIApplicationDelegate for the application. This class is responsible for launching the 

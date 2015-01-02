@@ -10,7 +10,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>MiddleMeeter.iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>FormsTemplateiOS</AssemblyName>
+    <AssemblyName>MiddleMeeteriOS</AssemblyName>
     <NuGetPackageImportStamp>e3473f57</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
@@ -68,7 +68,7 @@
     <MtouchUseThumb>False</MtouchUseThumb>
     <MtouchUseSGen>False</MtouchUseSGen>
     <MtouchUseRefCounting>False</MtouchUseRefCounting>
-    <MtouchOptimizePNGs>True</MtouchOptimizePNGs>
+    <MtouchOptimizePNGs>False</MtouchOptimizePNGs>
     <MtouchI18n />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
