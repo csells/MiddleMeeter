@@ -189,7 +189,11 @@ namespace MiddleMeeter {
       return child;
     }
 
+    bool populating = false;
     async void PopulateLocationSuggestions(AutoCompleteView theirLocation) {
+      if (populating) { return; }
+      populating = true;
+
       // avoid Sugestions, which filters, and set AvailableSugestions directly.
       theirLocation.AvailableSugestions.Clear();
 
@@ -201,6 +205,7 @@ namespace MiddleMeeter {
       }
 
       theirLocation.ListViewSugestions.IsVisible = theirLocation.AvailableSugestions.Count > 0;
+      populating = false;
     }
 
     async protected override void OnAppearing() {
