@@ -203,8 +203,12 @@ namespace MiddleMeeter {
       theirLocation.ListViewSugestions.IsVisible = theirLocation.AvailableSugestions.Count > 0;
     }
 
-    async protected override void OnAppearing() {
+    protected override void OnAppearing() {
       base.OnAppearing();
+      Device.StartTimer(TimeSpan.FromSeconds(1), () => { LookupYourLocation(); return false; });
+    }
+
+    async void LookupYourLocation() {
 
       if (!string.IsNullOrWhiteSpace(model.YourLocation)) { return; }
 
