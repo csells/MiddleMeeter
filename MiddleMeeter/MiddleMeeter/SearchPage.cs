@@ -6,6 +6,24 @@ using Xamarin.Forms;
 using Xamarin.Forms.Labs.Controls;
 
 namespace MiddleMeeter {
+  static class GridExtensions {
+    public static View GridRowCol(this View view, int row, int col) {
+      Grid.SetRow(view, row);
+      Grid.SetColumn(view, col);
+      return view;
+    }
+
+    public static View GridRowSpan(this View view, int span) {
+      Grid.SetRowSpan(view, span);
+      return view;
+    }
+
+    public static View GridColSpan(this View view, int span) {
+      Grid.SetColumnSpan(view, span);
+      return view;
+    }
+  }
+
   enum SearchMode {
     coffee = 0,
     food = 1,
@@ -83,6 +101,7 @@ namespace MiddleMeeter {
     ActivityIndicator activity = new ActivityIndicator();
     Label error = new Label();
     ResultsView resultsView = new ResultsView();
+    Geocoding gc = new Geocoding();
 
     public SearchPage() {
       Title = "Search";
@@ -93,8 +112,25 @@ namespace MiddleMeeter {
       var theirLocationLabel = new Label { Text = "Their Location:", VerticalOptions = LayoutOptions.Center };
       var pickerLabel = new Label { Text = "Mode:", VerticalOptions = LayoutOptions.Center };
 
-      var button1 = new Button { Text = "Search", HorizontalOptions = LayoutOptions.End, WidthRequest = 200 };
-      button1.Clicked += button1_Clicked;
+      var searchButton = new Button { Text = "Search", HorizontalOptions = LayoutOptions.End, WidthRequest = 200 };
+      searchButton.Clicked += searchButton_Clicked;
+
+      var yourLocationButton = new Image {
+        Aspect = Aspect.AspectFit,
+        Source = ImageSource.FromResource(this.GetType().Namespace + "." + Device.OnPlatform("iOS", "Droid", "WinPhone") + ".crosshairs.png"),
+      };
+
+      var tap = new TapGestureRecognizer();
+      tap.Tapped += yourLocationButton_Clicked;
+      yourLocationButton.GestureRecognizers.Add(tap);
+
+      //var yourLocationButton = new Button { Text = "±", FontSize = 30, FontFamily = "Wingdings",  };
+      //Device.OnPlatform(
+      //  () => { },
+      //  () => { yourLocationButton.Text = "@"; },
+      //  () => { }
+      //);
+      //yourLocationButton.Clicked += yourLocationButton_Clicked;
 
       var picker = new Picker { Title = "Mode" };
       foreach (var mode in new string[] { "coffee", "food", "drinks" }) {
@@ -102,92 +138,84 @@ namespace MiddleMeeter {
       }
       picker.SetBinding(Picker.SelectedIndexProperty, new Binding("Mode", converter: new ModeConverter()));
 
-      var yourLocation = new Entry { Placeholder = "your location" };
+      var yourLocation = new Entry { Placeholder = "your location", HorizontalOptions = LayoutOptions.Fill };
       yourLocation.SetBinding(Entry.TextProperty, new Binding("YourLocation"));
 
-      var theirLocation = new AutoCompleteView {
-        Placeholder = "their location",
-        ShowSearchButton = false,
-        SelectedCommand = new Command(() => { }),
-      };
-      theirLocation.SetBinding(AutoCompleteView.TextProperty, new Binding("TheirLocation"));
-      theirLocation.TextEntry.Text = model.TheirLocation;
+      var theirLocation = new Entry { Placeholder = "their location" };
+      theirLocation.SetBinding(Entry.TextProperty, new Binding("TheirLocation"));
 
       // disable Search button if no locations entered
       Action checkLocations = () => {
-        button1.IsEnabled = !string.IsNullOrEmpty(yourLocation.Text) && !string.IsNullOrEmpty(theirLocation.Text);
+        searchButton.IsEnabled = !string.IsNullOrEmpty(yourLocation.Text) && !string.IsNullOrEmpty(theirLocation.Text);
       };
       yourLocation.TextChanged += (sender, e) => { checkLocations(); };
-      theirLocation.PropertyChanged += (sender, e) => {
-        if (e.PropertyName == "Text" &&
-          !object.ReferenceEquals(theirLocation.ListViewSugestions.SelectedItem, theirLocation.Text)) {
-          checkLocations();
-          PopulateLocationSuggestions(theirLocation);
-        }
-      };
+      theirLocation.TextChanged += (sender, e) => { checkLocations(); };
       checkLocations();
 
       resultsView.SetBinding(ResultsView.ResultsProperty, "Results");
       var deviceResultsView = Device.Idiom == TargetIdiom.Tablet ? resultsView : new ContentView();
 
-      var portraitView = new StackLayout {
+      var yourLocationEntryAndButton = new Grid {
+        Children = {
+          yourLocation.GridRowCol(0, 0),
+          yourLocationButton.GridRowCol(0, 1),
+        },
+        ColumnDefinitions = new ColumnDefinitionCollection {
+          new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+          new ColumnDefinition { Width = GridLength.Auto },
+        },
+      };
+
+      Func<View> portraitView = () => new StackLayout {
         Children = {
           yourLocationLabel,
-          yourLocation,
+          yourLocationEntryAndButton,
           theirLocationLabel,
           theirLocation,
           pickerLabel,
           picker,
-          button1,
+          searchButton,
           activity,
           error,
           deviceResultsView,
         }
       };
 
-      var landscapeView = new Grid {
+      Func<View> landscapeView = () => new Grid {
         Children = {
-            GridChild(0, 0, yourLocationLabel),
-            GridChild(0, 1, yourLocation),
-            GridChild(1, 0, theirLocationLabel),
-            GridChild(1, 1, theirLocation),
-            GridChild(2, 0, pickerLabel),
-            GridChild(2, 1, picker),
-            GridChild(3, 0, button1),
-            GridChild(4, 0, activity),
-            GridChild(5, 0, error),
-            GridChild(6, 0, deviceResultsView),
-          },
+          yourLocationLabel.GridRowCol(0, 0),
+          yourLocationEntryAndButton.GridRowCol(0, 1),
+
+          theirLocationLabel.GridRowCol(1, 0),
+          theirLocation.GridRowCol(1, 1),
+          
+          pickerLabel.GridRowCol(2, 0),
+          picker.GridRowCol(2, 1),
+          
+          searchButton.GridRowCol(3, 0).GridColSpan(2),
+          activity.GridRowCol(4, 0).GridColSpan(2),
+          error.GridRowCol(5, 0).GridColSpan(2),
+          deviceResultsView.GridRowCol(6, 0).GridColSpan(2),
+        },
         ColumnDefinitions = {
-            new ColumnDefinition { Width = GridLength.Auto },
-            new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-          },
+          new ColumnDefinition { Width = GridLength.Auto },
+          new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+        },
         RowDefinitions = {
-            new RowDefinition { Height = GridLength.Auto },
-            new RowDefinition { Height = GridLength.Auto },
-            new RowDefinition { Height = GridLength.Auto },
-            new RowDefinition { Height = GridLength.Auto },
-            new RowDefinition { Height = GridLength.Auto },
-            new RowDefinition { Height = GridLength.Auto },
-            new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-          },
+          new RowDefinition { Height = GridLength.Auto },
+          new RowDefinition { Height = GridLength.Auto },
+          new RowDefinition { Height = GridLength.Auto },
+          new RowDefinition { Height = GridLength.Auto },
+          new RowDefinition { Height = GridLength.Auto },
+          new RowDefinition { Height = GridLength.Auto },
+          new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+        },
       };
 
-      Grid.SetColumnSpan(landscapeView.Children[6], landscapeView.ColumnDefinitions.Count);
-      Grid.SetColumnSpan(landscapeView.Children[7], landscapeView.ColumnDefinitions.Count);
-      Grid.SetColumnSpan(landscapeView.Children[8], landscapeView.ColumnDefinitions.Count);
-      Grid.SetColumnSpan(landscapeView.Children[9], landscapeView.ColumnDefinitions.Count);
-
-      SizeChanged += (sender, e) => Content = IsPortrait(this) ? (View)portraitView : (View)landscapeView;
+      SizeChanged += (sender, e) => Content = IsPortrait(this) ? portraitView() : landscapeView();
     }
 
     static bool IsPortrait(Page p) { return p.Width < p.Height; }
-
-    View GridChild(int row, int col, View child) {
-      Grid.SetRow(child, row);
-      Grid.SetColumn(child, col);
-      return child;
-    }
 
     async void PopulateLocationSuggestions(AutoCompleteView theirLocation) {
       // avoid Sugestions, which filters, and set AvailableSugestions directly.
@@ -195,7 +223,6 @@ namespace MiddleMeeter {
 
       var addr = theirLocation.Text;
       if (addr != null && addr.Length > 2) {
-        var gc = new Geocoding();
         var suggestions = await gc.GetLocationSuggestionsAsync(addr);
         foreach (var s in suggestions) { theirLocation.AvailableSugestions.Add(s); }
       }
@@ -203,19 +230,10 @@ namespace MiddleMeeter {
       theirLocation.ListViewSugestions.IsVisible = theirLocation.AvailableSugestions.Count > 0;
     }
 
-    protected override void OnAppearing() {
-      base.OnAppearing();
-      Device.StartTimer(TimeSpan.FromSeconds(1), () => { LookupYourLocation(); return false; });
-    }
-
-    async void LookupYourLocation() {
-
-      if (!string.IsNullOrWhiteSpace(model.YourLocation)) { return; }
-
+    async void yourLocationButton_Clicked(object sender, EventArgs e) {
       try {
         activity.IsRunning = true;
 
-        var gc = new Geocoding();
         var loc = await gc.GetCurrentLocationAsync();
         var addr = await gc.GetAddressForLocationAsync(loc);
         model.YourLocation = addr;
@@ -228,12 +246,10 @@ namespace MiddleMeeter {
       }
     }
 
-    async void button1_Clicked(object sender, EventArgs e) {
+    async void searchButton_Clicked(object sender, EventArgs e) {
       try {
         activity.IsRunning = true;
         error.Text = "";
-
-        var gc = new Geocoding();
 
         var yourGeocode = await gc.GetGeocodeForLocationAsync(model.YourLocation);
         var theirGeocode = await gc.GetGeocodeForLocationAsync(model.TheirLocation);
