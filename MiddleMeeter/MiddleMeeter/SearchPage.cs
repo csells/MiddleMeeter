@@ -89,6 +89,10 @@ namespace MiddleMeeter {
       Padding = 20;
       BindingContext = model;
 
+      var yourLocationLabel = new Label { Text = "Your Location:", VerticalOptions = LayoutOptions.Center };
+      var theirLocationLabel = new Label { Text = "Their Location:", VerticalOptions = LayoutOptions.Center };
+      var pickerLabel = new Label { Text = "Mode:", VerticalOptions = LayoutOptions.Center };
+
       var button1 = new Button { Text = "Search", HorizontalOptions = LayoutOptions.End, WidthRequest = 200 };
       button1.Clicked += button1_Clicked;
 
@@ -126,13 +130,13 @@ namespace MiddleMeeter {
       resultsView.SetBinding(ResultsView.ResultsProperty, "Results");
       var deviceResultsView = Device.Idiom == TargetIdiom.Tablet ? resultsView : new ContentView();
 
-      Func<View> portraitView = () => new StackLayout {
+      var portraitView = new StackLayout {
         Children = {
-          new Label { Text = "Your Location:" },
+          yourLocationLabel,
           yourLocation,
-          new Label { Text = "Their Location:" },
+          theirLocationLabel,
           theirLocation,
-          new Label { Text = "Mode:" },
+          pickerLabel,
           picker,
           button1,
           activity,
@@ -141,25 +145,24 @@ namespace MiddleMeeter {
         }
       };
 
-      Func<View> landscapeView = () => {
-        var grid = new Grid {
-          Children = {
-            GridChild(0, 0, new Label { Text = "Your Location:", VerticalOptions = LayoutOptions.Center }),
+      var landscapeView = new Grid {
+        Children = {
+            GridChild(0, 0, yourLocationLabel),
             GridChild(0, 1, yourLocation),
-            GridChild(1, 0, new Label { Text = "Their Location:", VerticalOptions = LayoutOptions.Center }),
+            GridChild(1, 0, theirLocationLabel),
             GridChild(1, 1, theirLocation),
-            GridChild(2, 0, new Label { Text = "Mode:", VerticalOptions = LayoutOptions.Center }),
+            GridChild(2, 0, pickerLabel),
             GridChild(2, 1, picker),
             GridChild(3, 0, button1),
             GridChild(4, 0, activity),
             GridChild(5, 0, error),
             GridChild(6, 0, deviceResultsView),
           },
-          ColumnDefinitions = {
+        ColumnDefinitions = {
             new ColumnDefinition { Width = GridLength.Auto },
             new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
           },
-          RowDefinitions = {
+        RowDefinitions = {
             new RowDefinition { Height = GridLength.Auto },
             new RowDefinition { Height = GridLength.Auto },
             new RowDefinition { Height = GridLength.Auto },
@@ -168,17 +171,14 @@ namespace MiddleMeeter {
             new RowDefinition { Height = GridLength.Auto },
             new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
           },
-        };
-
-        Grid.SetColumnSpan(grid.Children[6], grid.ColumnDefinitions.Count);
-        Grid.SetColumnSpan(grid.Children[7], grid.ColumnDefinitions.Count);
-        Grid.SetColumnSpan(grid.Children[8], grid.ColumnDefinitions.Count);
-        Grid.SetColumnSpan(grid.Children[9], grid.ColumnDefinitions.Count);
-
-        return grid;
       };
 
-      SizeChanged += (sender, e) => Content = IsPortrait(this) ? portraitView() : landscapeView();
+      Grid.SetColumnSpan(landscapeView.Children[6], landscapeView.ColumnDefinitions.Count);
+      Grid.SetColumnSpan(landscapeView.Children[7], landscapeView.ColumnDefinitions.Count);
+      Grid.SetColumnSpan(landscapeView.Children[8], landscapeView.ColumnDefinitions.Count);
+      Grid.SetColumnSpan(landscapeView.Children[9], landscapeView.ColumnDefinitions.Count);
+
+      SizeChanged += (sender, e) => Content = IsPortrait(this) ? (View)portraitView : (View)landscapeView;
     }
 
     static bool IsPortrait(Page p) { return p.Width < p.Height; }
