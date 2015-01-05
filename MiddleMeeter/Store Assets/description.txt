@@ -1,0 +1,1 @@
+A simple application for finding places to meet in the middle between you and a friend. The places you find could be coffee shops, restaurants or bars. Once you find them, see reviews and driving directions in the native map app and share the details with your friend. Ideal for getting together across town or across country.

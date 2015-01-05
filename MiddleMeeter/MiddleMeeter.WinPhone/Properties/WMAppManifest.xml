@@ -1,14 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
   <DefaultLanguage xmlns="" code="en-US" />
-  <App xmlns="" ProductID="{e2f92237-5297-460b-be1f-96d02694b3cc}" Title="MiddleMeeter.WinPhone" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="MiddleMeeter.WinPhone author" Description="Sample description" Publisher="MiddleMeeter.WinPhone" PublisherID="{819f975d-f2b7-4208-8ee8-7d599120d403}">
+  <App xmlns="" ProductID="{e2f92237-5297-460b-be1f-96d02694b3cc}" Title="MiddleMeeter" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal" Author="Chris Sells" Description="A simple application for finding places to meet in the middle between you and a friend. Once you find a suitable coffee shop, restaurant or bar, see reviews and driving directions in the native map app and share the details with your friend." Publisher="Sells Brothers, Inc." PublisherID="{819f975d-f2b7-4208-8ee8-7d599120d403}">
     <IconPath IsRelative="true" IsResource="false">Assets\ApplicationIcon.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
-      <Capability Name="ID_CAP_MEDIALIB_AUDIO" />
-      <Capability Name="ID_CAP_MEDIALIB_PLAYBACK" />
-      <Capability Name="ID_CAP_SENSORS" />
-      <Capability Name="ID_CAP_WEBBROWSERCOMPONENT" />
       <Capability Name="ID_CAP_LOCATION" />
     </Capabilities>
     <Tasks>
