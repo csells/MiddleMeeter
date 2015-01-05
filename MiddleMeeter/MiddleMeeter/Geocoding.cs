@@ -36,7 +36,11 @@ namespace MiddleMeeter {
     }
 
     public async Task<Geocode> GetCurrentLocationAsync() {
+#if __IOS__
+      var geolocator = new Xamarin.Forms.Labs.iOS.Services.Geolocation.Geolocator();
+#else
       var geolocator = DependencyService.Get<IGeolocator>();
+#endif
       var loc = await geolocator.GetPositionAsync(10000);
       return new Geocode { Latitude = loc.Latitude, Longitude = loc.Longitude };
     }

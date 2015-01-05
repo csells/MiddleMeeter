@@ -1,109 +1,25 @@
 ﻿using Refractored.Xam.Settings;
 using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using Xamarin.Forms;
-using Xamarin.Forms.Labs.Controls;
 
 namespace MiddleMeeter {
-  static class GridExtensions {
-    public static View GridRowCol(this View view, int row, int col) {
-      Grid.SetRow(view, row);
-      Grid.SetColumn(view, col);
-      return view;
-    }
-
-    public static View GridRowSpan(this View view, int span) {
-      Grid.SetRowSpan(view, span);
-      return view;
-    }
-
-    public static View GridColSpan(this View view, int span) {
-      Grid.SetColumnSpan(view, span);
-      return view;
-    }
-  }
-
-  enum SearchMode {
-    coffee = 0,
-    food = 1,
-    drinks = 2,
-  }
-
-  class ModeConverter : IValueConverter {
-    public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-      return (int)value;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-      return (SearchMode)value;
-    }
-  }
-
-  class SearchModel : INotifyPropertyChanged {
-    string yourLocation;
-    // reading values saved during the last session (or setting defaults)
-    string theirLocation = CrossSettings.Current.GetValueOrDefault("theirLocation", "");
-    SearchMode mode = CrossSettings.Current.GetValueOrDefault("mode", SearchMode.food);
-    Place[] results = null;
-
-    public string YourLocation {
-      get { return this.yourLocation; }
-      set {
-        if (this.yourLocation != value) {
-          this.yourLocation = value;
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    public string TheirLocation {
-      get { return this.theirLocation; }
-      set {
-        if (this.theirLocation != value) {
-          this.theirLocation = value;
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    public SearchMode Mode {
-      get { return this.mode; }
-      set {
-        if (this.mode != value) {
-          this.mode = value;
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    public Place[] Results {
-      get { return this.results; }
-      set {
-        if (this.results != value) {
-          this.results = value;
-          NotifyPropertyChanged();
-        }
-      }
-    }
-
-    void NotifyPropertyChanged([CallerMemberName]string propertyName = "") {
-      if (PropertyChanged != null) {
-        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-      }
-    }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-  }
-
   class SearchPage : ContentPage {
     SearchModel model = new SearchModel();
-    ActivityIndicator activity = new ActivityIndicator();
-    Label error = new Label();
+    ActivityIndicator activity = new ActivityIndicator { WidthRequest = 100, HorizontalOptions = LayoutOptions.End };
+    Label status = new Label { HorizontalOptions = LayoutOptions.FillAndExpand, VerticalOptions = LayoutOptions.Start };
     ResultsView resultsView = new ResultsView();
     Geocoding gc = new Geocoding();
+    Func<View> portraitView;
+    Func<View> landscapeView;
 
     public SearchPage() {
+      // reading values saved during the last session (or setting defaults)
+      // NOTE: for iOS, if this happens in the wrong place, data binding fails
+      // 2015-01-04 16:02:53.739 MiddleMeeteriOS[1758:673574] Binding: 'TheirLocation' property not found on 'MiddleMeeter.SearchModel', target property: 'Xamarin.Forms.Entry.Text'
+      // 2015-01-04 16:02:53.860 MiddleMeeteriOS[1758:673574] Binding: 'Mode' property not found on 'MiddleMeeter.SearchModel', target property: 'Xamarin.Forms.Picker.SelectedIndex'
+      model.TheirLocation = CrossSettings.Current.GetValueOrDefault("theirLocation", "");
+      model.Mode = CrossSettings.Current.GetValueOrDefault("mode", SearchMode.food);
+
       Title = "Search";
       Padding = 20;
       BindingContext = model;
@@ -112,25 +28,11 @@ namespace MiddleMeeter {
       var theirLocationLabel = new Label { Text = "Their Location:", VerticalOptions = LayoutOptions.Center };
       var pickerLabel = new Label { Text = "Mode:", VerticalOptions = LayoutOptions.Center };
 
+      var yourLocationButton = new Button { Text = "⊕", FontSize = 30, HorizontalOptions = LayoutOptions.End };
+      yourLocationButton.Clicked += yourLocationButton_Clicked;
+
       var searchButton = new Button { Text = "Search", HorizontalOptions = LayoutOptions.End, WidthRequest = 200 };
       searchButton.Clicked += searchButton_Clicked;
-
-      var yourLocationButton = new Image {
-        Aspect = Aspect.AspectFit,
-        Source = ImageSource.FromResource(this.GetType().Namespace + "." + Device.OnPlatform("iOS", "Droid", "WinPhone") + ".crosshairs.png"),
-      };
-
-      var tap = new TapGestureRecognizer();
-      tap.Tapped += yourLocationButton_Clicked;
-      yourLocationButton.GestureRecognizers.Add(tap);
-
-      //var yourLocationButton = new Button { Text = "±", FontSize = 30, FontFamily = "Wingdings",  };
-      //Device.OnPlatform(
-      //  () => { },
-      //  () => { yourLocationButton.Text = "@"; },
-      //  () => { }
-      //);
-      //yourLocationButton.Clicked += yourLocationButton_Clicked;
 
       var picker = new Picker { Title = "Mode" };
       foreach (var mode in new string[] { "coffee", "food", "drinks" }) {
@@ -142,7 +44,7 @@ namespace MiddleMeeter {
       yourLocation.SetBinding(Entry.TextProperty, new Binding("YourLocation"));
 
       var theirLocation = new Entry { Placeholder = "their location" };
-      theirLocation.SetBinding(Entry.TextProperty, new Binding("TheirLocation"));
+      theirLocation.SetBinding(Entry.TextProperty, new Binding("TheirLocation", BindingMode.TwoWay));
 
       // disable Search button if no locations entered
       Action checkLocations = () => {
@@ -166,7 +68,12 @@ namespace MiddleMeeter {
         },
       };
 
-      Func<View> portraitView = () => new StackLayout {
+      var statusAndActivity = new StackLayout {
+        Orientation = StackOrientation.Horizontal,
+        Children = { status, activity },
+      };
+
+      portraitView = () => new StackLayout {
         Children = {
           yourLocationLabel,
           yourLocationEntryAndButton,
@@ -175,13 +82,12 @@ namespace MiddleMeeter {
           pickerLabel,
           picker,
           searchButton,
-          activity,
-          error,
+          statusAndActivity,
           deviceResultsView,
         }
       };
 
-      Func<View> landscapeView = () => new Grid {
+      landscapeView = () => new Grid {
         Children = {
           yourLocationLabel.GridRowCol(0, 0),
           yourLocationEntryAndButton.GridRowCol(0, 1),
@@ -193,16 +99,14 @@ namespace MiddleMeeter {
           picker.GridRowCol(2, 1),
           
           searchButton.GridRowCol(3, 0).GridColSpan(2),
-          activity.GridRowCol(4, 0).GridColSpan(2),
-          error.GridRowCol(5, 0).GridColSpan(2),
-          deviceResultsView.GridRowCol(6, 0).GridColSpan(2),
+          statusAndActivity.GridRowCol(4, 0).GridColSpan(2),
+          deviceResultsView.GridRowCol(5, 0).GridColSpan(2),
         },
         ColumnDefinitions = {
           new ColumnDefinition { Width = GridLength.Auto },
           new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
         },
         RowDefinitions = {
-          new RowDefinition { Height = GridLength.Auto },
           new RowDefinition { Height = GridLength.Auto },
           new RowDefinition { Height = GridLength.Auto },
           new RowDefinition { Height = GridLength.Auto },
@@ -217,29 +121,18 @@ namespace MiddleMeeter {
 
     static bool IsPortrait(Page p) { return p.Width < p.Height; }
 
-    async void PopulateLocationSuggestions(AutoCompleteView theirLocation) {
-      // avoid Sugestions, which filters, and set AvailableSugestions directly.
-      theirLocation.AvailableSugestions.Clear();
-
-      var addr = theirLocation.Text;
-      if (addr != null && addr.Length > 2) {
-        var suggestions = await gc.GetLocationSuggestionsAsync(addr);
-        foreach (var s in suggestions) { theirLocation.AvailableSugestions.Add(s); }
-      }
-
-      theirLocation.ListViewSugestions.IsVisible = theirLocation.AvailableSugestions.Count > 0;
-    }
-
     async void yourLocationButton_Clicked(object sender, EventArgs e) {
       try {
         activity.IsRunning = true;
+        status.Text = "finding your location...";
 
         var loc = await gc.GetCurrentLocationAsync();
         var addr = await gc.GetAddressForLocationAsync(loc);
         model.YourLocation = addr;
+        status.Text = "";
       }
       catch (Exception ex) {
-        error.Text = "Can't get your location: " + ex.Message;
+        status.Text = "Can't get your location: " + ex.Message;
       }
       finally {
         activity.IsRunning = false;
@@ -249,7 +142,7 @@ namespace MiddleMeeter {
     async void searchButton_Clicked(object sender, EventArgs e) {
       try {
         activity.IsRunning = true;
-        error.Text = "";
+        status.Text = "searching...";
 
         var yourGeocode = await gc.GetGeocodeForLocationAsync(model.YourLocation);
         var theirGeocode = await gc.GetGeocodeForLocationAsync(model.TheirLocation);
@@ -264,9 +157,11 @@ namespace MiddleMeeter {
         if (Device.Idiom != TargetIdiom.Tablet) {
           await Navigation.PushAsync(new ResultsPage(resultsView));
         }
+
+        status.Text = "";
       }
       catch (Exception ex) {
-        error.Text = "Check your network connection: " + ex.Message;
+        status.Text = "Check your network connection: " + ex.Message;
       }
       finally {
         activity.IsRunning = false;

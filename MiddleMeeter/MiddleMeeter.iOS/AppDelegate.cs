@@ -20,7 +20,8 @@ namespace MiddleMeeter.iOS {
     //
     public override bool FinishedLaunching(UIApplication app, NSDictionary options) {
       // DONE: force dependency injection
-      new Xamarin.Forms.Labs.iOS.Services.Geolocation.Geolocator();
+      // BUG: makes a crash happen on iOS during startup
+      //new Xamarin.Forms.Labs.iOS.Services.Geolocation.Geolocator();
 
       Forms.Init();
 

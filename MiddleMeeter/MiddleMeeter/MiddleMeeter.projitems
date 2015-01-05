@@ -11,7 +11,9 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)App.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Geocoding.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GridExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ResultsPage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SearchModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SearchPage.cs" />
   </ItemGroup>
   <ItemGroup>
