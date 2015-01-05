@@ -160,3 +160,4 @@ packages/*
 !packages/repositories.config
 MiddleMeeter/MiddleMeeter/config.xml
 MiddleMeeter/Store Assets/Android/middlemeeter.keystore
+*.apk

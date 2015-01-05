@@ -1,6 +1,6 @@
 <ManualTestResults version="1.0.0.5">
   <ManualTestCases>
-    <ManualTestCase Name="4.7.1">Pending</ManualTestCase>
+    <ManualTestCase Name="4.7.1">Passed</ManualTestCase>
     <ManualTestCase Name="5.1.1">Pending</ManualTestCase>
     <ManualTestCase Name="5.1.2">Pending</ManualTestCase>
     <ManualTestCase Name="5.1.3">Pending</ManualTestCase>
